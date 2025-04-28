@@ -3,8 +3,8 @@
 -- turtle behavior to fetch and run assigned route from server
 
 local nav = require("nav")
-local goHome = require("home_return")
-local idleWatch = require("idle_watch")
+local goHome = require("nav/home_return")
+local idleWatch = require("nav/idle_watch")
 
 rednet.open("right") -- adjust to your modem side
 shell.run("sync_waypoints.lua")
