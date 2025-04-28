@@ -17,16 +17,17 @@ This setup allows turtles to operate in a fleet, running predefined routes betwe
 ```
 /turtle-fleet/
 ├── nav/
-│   ├── fuel.lua         # Fuel logic and emergency return
-│   ├── move.lua         # Axis-based movement and facing
-│   ├── state.lua        # Persistent position/direction tracking
-│   └── init.lua         # Entry point for nav functions
-├── pathfinding.lua      # Turtle-side route execution
-├── route_manager.lua    # Server-side route assignment and management
-├── route_dashboard.lua  # Monitor UI for tracking turtles and routes
-├── savewp.lua           # Save current position as named waypoint
+│   ├── fuel.lua               # Fuel logic and emergency return
+│   ├── move.lua               # Axis-based movement and facing
+│   ├── state.lua              # Persistent position/direction tracking
+│   ├── init.lua               # Entry point for nav functions
+│   └── detect_direction.lua   # GPS based direction finder
+├── pathfinding.lua            # Turtle-side route execution
+├── route_manager.lua          # Server-side route assignment and management
+├── route_dashboard.lua        # Monitor UI for tracking turtles and routes
+├── savewp.lua                 # Save current position as named waypoint
 ├── routes/
-│   ├── mine_loop.txt    # Example route: list of waypoint names
+│   ├── mine_loop.txt          # Example route: list of waypoint names
 │   └── depot_run.txt
 ```
 
@@ -62,4 +63,4 @@ This setup allows turtles to operate in a fleet, running predefined routes betwe
 - Persistent state saving
 
 ## Author
-- [Dos Gringos]
+- Dos Gringos
