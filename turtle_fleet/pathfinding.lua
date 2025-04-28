@@ -47,7 +47,7 @@ local function sendStatus(status, pathInfo)
  -- ===PATROL RUNNER===
 local function runPath(path)
     --forward
-    for  = 1, #path do
+    for i = 1, #path do
         sendStatus("moving", {current = i, total = #path, direction = "forward", waypoint = path[i]})
         if nav.emergencyReturn() then return false end
         nav.moveTo(path[i])
