@@ -20,6 +20,8 @@ shell.run("wget https://raw.githubusercontent.com/Dos-Gringos/TurtleTruckerFleet
 sleep(1)
 shell.run("wget https://raw.githubusercontent.com/Dos-Gringos/TurtleTruckerFleet/refs/heads/main/turtle_fleet/nav/detect_direction.lua nav/detect_direction.lua")
 sleep(1)
+shell.run("wget https://raw.githubusercontent.com/Dos-Gringos/TurtleTruckerFleet/refs/heads/main/turtle_fleet/savewp.lua savewp")
+sleep(1)
 
 -- download pathfinding
 shell.run("wget https://raw.githubusercontent.com/Dos-Gringos/TurtleTruckerFleet//main/turtle_fleet/pathfinding.lua pathfinding.lua")
