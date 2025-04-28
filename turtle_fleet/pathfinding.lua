@@ -2,6 +2,10 @@
 -- dynamic_patrol.lua
 -- turtle behavior to fetch and run assigned route from server
 
+print("PWD:", shell.dir())
+print("FILES:", textutils.serialize(fs.list(".")))
+print("NAV FILES:", textutils.serialize(fs.list("nav")))
+
 local nav = require("nav")
 local goHome = require("nav/home_return")
 local idleWatch = require("nav/idle_watch")
