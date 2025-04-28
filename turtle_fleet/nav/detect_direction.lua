@@ -1,6 +1,5 @@
 -- nav/detect_direction.lua
 
-local gps = require("gps")
 local state = require("nav/state")
 
 local function detectDirection()
