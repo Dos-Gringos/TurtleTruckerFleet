@@ -1,7 +1,7 @@
 -- nav/init.lua
-local state = require("nav/state.lua")
-local move = require("nav/move.lua")
-local fuel = require("nav/fuel.lua")
+local state = require("nav/state")
+local move = require("nav/move")
+local fuel = require("nav/fuel")
 state.load()
  
 return {
