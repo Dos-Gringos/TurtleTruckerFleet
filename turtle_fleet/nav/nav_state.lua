@@ -32,7 +32,7 @@ local function loadState()
     home = vector.new(pos.x, pos.y, pos.z)
     saveState()
   end
-  
+end
 
 -- === accessors ===
 return {
