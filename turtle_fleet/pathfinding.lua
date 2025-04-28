@@ -6,6 +6,7 @@ print("PWD:", shell.dir())
 print("FILES:", textutils.serialize(fs.list(".")))
 print("NAV FILES:", textutils.serialize(fs.list("nav")))
 sleep(10)
+
 local nav = require("nav")
 local goHome = require("nav/home_return")
 local idleWatch = require("nav/idle_watch")
@@ -71,16 +72,14 @@ local function runPath(path)
     end    
     -- reverse trip back home
     for i = #path - 1, 1, -1 do
-      local wpName = path[i]
-      local targetPos = waypoints[wpName]
-      if targetPos then
-        sendStatus("moving", {current = i, total = #path, direction = "return", waypoint = wpName})
-        if nav.emergencyReturn() then return false end
-        nav.moveTo(targetPos)
-        idleWatch.resetTimer()
-        sleep(0.2)
-      end
+      local targetPos = path[i]
+      sendStatus("moving", {current = i, total = #path, direction = "return"})
+      if nav.emergencyReturn() then return false end
+      nav.moveTo(targetPos)
+      idleWatch.resetTimer()
+      sleep(0.2)
     end
+    
     -- once back at starting point
     if not nav.atHome() then
       goHome()
