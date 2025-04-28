@@ -3,6 +3,8 @@
 -- turtle behavior to fetch and run assigned route from server
 
 local nav = require("nav")
+local goHome = require("home_return")
+local idleWatch = require("idle_watch")
 
 rednet.open("right") -- adjust to your modem side
 shell.run("sync_waypoints.lua")
@@ -51,6 +53,7 @@ local function runPath(path)
         sendStatus("moving", {current = i, total = #path, direction = "forward", waypoint = path[i]})
         if nav.emergencyReturn() then return false end
         nav.moveTo(path[i])
+        idleWatch.resetTimer()
         sleep(0.2)
     end
 
@@ -59,8 +62,25 @@ local function runPath(path)
       sendStatus("moving", {current = i, total = #path, direction = "return", waypoint = path[i]})
       if nav.emergencyReturn() then return false end
       nav.moveTo(path[i])
+      idleWatch.resetTimer()
       sleep(0.2)
     end    
+    -- reverse trip back home
+    for i = #path - 1, 1, -1 do
+      local wpName = path[i]
+      local targetPos = waypoints[wpName]
+      if targetPos then
+        sendStatus("moving", {current = i, total = #path, direction = "return", waypoint = wpName})
+        if nav.emergencyReturn() then return false end
+        nav.moveTo(targetPos)
+        idleWatch.resetTimer()
+        sleep(0.2)
+      end
+    end
+    -- once back at starting point
+    if not nav.atHome() then
+      goHome()
+    end
 
     return true
 
@@ -96,8 +116,14 @@ while true do
         turtle.refuel()
       end
 
+      idleWatch.checkIdle()
+
       sendStatus(success and "complete" or "aborted")
       print("Route " .. (success and "complete" or "aborted due to emergency."))
+
+      if goHome() then
+        print("Turtle: " .. os.getComputerLabel() .. " returning home")
+      end
     end
   end
   sleep(2)
