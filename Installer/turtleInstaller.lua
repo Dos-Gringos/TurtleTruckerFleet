@@ -3,8 +3,11 @@ if fs.exists("nav") then fs.delete("nav") end
 print("nav/ deleted")
 if fs.exists("pathfinding.lua") then fs.delete("pathfinding.lua") end
 print("pathfinding deleted")
-if not fs.exists("waypoints.txt") then fs.open("waypoints.txt") end
-
+if not fs.exists("waypoints.txt") then
+    local f = fs.open("waypoints.txt", "w")
+    f.close()
+  end
+  
 -- make new nav dir
 fs.makeDir("nav")
 
