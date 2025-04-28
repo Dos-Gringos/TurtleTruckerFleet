@@ -55,12 +55,12 @@ local function runPath(path)
     end
 
     --reverse
-    for i = #path -1, 1, -1 do
-        sendStatus("moving", {current = i, total = #path, direction = "return", waypoint = path[i]})
-        if nav == emergencyReturn() then return false end
-        nave.moveTo(path[i])
-        sleep(0.2)
-    end
+    for i = #path - 1, 1, -1 do
+      sendStatus("moving", {current = i, total = #path, direction = "return", waypoint = path[i]})
+      if nav.emergencyReturn() then return false end
+      nav.moveTo(path[i])
+      sleep(0.2)
+    end    
 
     return true
 
