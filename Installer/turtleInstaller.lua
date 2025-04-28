@@ -19,7 +19,7 @@ shell.run("wget https://raw.githubusercontent.com/Dos-Gringos/TurtleTruckerFleet
 shell.run("wget https://raw.githubusercontent.com/Dos-Gringos/TurtleTruckerFleet/refs/heads/main/turtle_fleet/nav/detect_direction.lua nav/detect_direction.lua")
 shell.run("wget https://raw.githubusercontent.com/Dos-Gringos/TurtleTruckerFleet/refs/heads/main/turtle_fleet/savewp.lua savewp")
 shell.run("wget https://raw.githubusercontent.com/Dos-Gringos/TurtleTruckerFleet/refs/heads/main/turtle_fleet/nav/home_return.lua nav/home_return.lua")
-shell.run("wget https://raw.githubusercontent.com/Dos-Gringos/TurtleTruckerFleet/refs/heads/main/turtle_fleet/nav/idle_watch.lua idle_watch.lua")
+shell.run("wget https://raw.githubusercontent.com/Dos-Gringos/TurtleTruckerFleet/refs/heads/main/turtle_fleet/nav/idle_watch.lua nav/dle_watch.lua")
 
 -- download pathfinding
 shell.run("wget https://raw.githubusercontent.com/Dos-Gringos/TurtleTruckerFleet//main/turtle_fleet/pathfinding.lua pathfinding.lua")
