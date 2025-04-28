@@ -5,7 +5,7 @@ sleep(1)
 if fs.exists("pathfinding.lua") then fs.delete("pathfinding.lua") end
 print("pathfinding deleted")
 sleep(1)
-if fs.exists("waypoints.txt") then fs.make("waypoints.txt") end
+if fs.exists("waypoints.txt") then fs.open("waypoints.txt") end
 
 -- make new nav dir
 fs.makeDir("nav")
