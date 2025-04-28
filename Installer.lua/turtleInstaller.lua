@@ -1,6 +1,7 @@
 -- wipe old files
 if fs.exists("nav") then fs.delete("nav") end
 if fs.exists("pathfinding.lua") then fs.delete("pathfinding.lua") end
+if fs.exists("nav/detect_direction.lua") then fs.delete("nav/detect_direction.lua")
 
 -- make new nav dir
 fs.makeDir("nav")
