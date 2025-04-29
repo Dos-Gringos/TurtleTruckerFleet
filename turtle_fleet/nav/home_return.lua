@@ -20,22 +20,29 @@ local function goHome()
     end
   end
 
-  local home = state.getHome()
-  if not home then
-    print("[TURTLE] Error: No home position set!")
+  local pads = state.listHomePads()
+  if #pads == 0 then
+    print("[TURTLE] Error: No home pads available!")
     return false
   end
 
-  print("[TURTLE] Moving to home at: " .. home.x .. ", " .. home.y .. ", " .. home.z)
-  nav.moveTo(home)
+  -- pick random pad to target
+  local targetPad = pads[math.random(#pads)]
 
-  if nav.atHome() then
-    print("[TURTLE] Successfully returned home.")
-    return true
-  else
-    print("[TURTLE] Failed to reach home.")
-    return false
+  print(string.format("[TURTLE] Moving to home pad at: %d %d %d", targetPad.x, targetPad.y, targetPad.z))
+  nav.moveTo(targetPad)
+
+  -- re-check
+  local pos = nav.getPos()
+  for _, pad in ipairs(pads) do
+    if pos:equals(pad) then
+      print("[TURTLE] Successfully returned to a home pad.")
+      return true
+    end
   end
+
+  print("[TURTLE] Failed to reach any home pad.")
+  return false
 end
 
 return goHome
