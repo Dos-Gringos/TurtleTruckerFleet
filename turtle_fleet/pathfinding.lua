@@ -5,7 +5,7 @@
 print("PWD:", shell.dir())
 print("FILES:", textutils.serialize(fs.list(".")))
 print("NAV FILES:", textutils.serialize(fs.list("nav")))
-sleep(5)
+sleep(1)
 
 local nav = require("nav")
 local goHome = require("nav/home_return")
