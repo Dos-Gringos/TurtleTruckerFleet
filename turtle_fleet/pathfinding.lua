@@ -135,8 +135,10 @@ local function countCargo()
 end
 
 -- === smarter delivery loop ===
-local function runDelivery(path, quantityRequested)
+local function runDelivery(path,  waypointNames, quantityRequested)
   local remaining = quantityRequested
+  local name = waypointNames[i]:lower()
+
   print("[DELIVERY] Starting delivery. Target:", remaining)
 
   while remaining > 0 do
@@ -171,20 +173,11 @@ local function runDelivery(path, quantityRequested)
     idleWatch.checkIdle()
     sleep(1)
   end
-
-  if nav.atHome() then
-    print("[DEPARTURE] Detecting direction...")
-    local pos, dir = detectDirection()
-    local state = require("nav/state")
-    state.setPos(pos)
-    state.setDir(dir)
-    print(string.format("[DIR DETECT] Facing %d (0=N,1=E,2=S,3=W)", dir))
   
     local pads = state.listHomePads()
     local pad = pads[math.random(#pads)] -- later you'll want smarter assignment
     print("[DEPARTURE] Moving from home pad to first waypoint.")
     departFromPad(path[1])
-  end
 
   return true
 end
@@ -219,6 +212,14 @@ end
 -- === MAIN LOOP ===
 while true do
   if nav.atHome() then
+    print("[DETECT] Running direction detection...")
+    local pos, dir = detectDirection()
+    state.setPos(pos)
+    state.setDir(dir)
+    print(string.format("[DIR SET] Now facing %d (0=N,1=E,2=S,3=W)", dir))
+
+    sendStatus("idle")
+    print("Waiting for route assignment...")
     sendStatus("idle")
     print("Waiting for route assignment...")
 
@@ -258,7 +259,7 @@ while true do
         print("[DELIVERY] Delivery mode detected. Quantity requested:", msg.quantityRequested)
         local pickupIdx = 1
         local dropoffIdx = #path
-        success = runDelivery(path, pickupIdx, dropoffIdx, msg.quantityRequested)
+        success = runDelivery(path, msg.waypoints, msg.quantityRequested)
       else
         print("[PATROL] Patrol mode detected.")
         success = runPath(path)
