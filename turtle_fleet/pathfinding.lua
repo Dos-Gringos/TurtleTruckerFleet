@@ -14,6 +14,27 @@ local idleWatch = require("nav/idle_watch")
 rednet.open("right") -- adjust to your modem side
 shell.run("sync_waypoints.lua")
 
+local function returnFromWaypointToPad(padVec)
+  local currentPos = nav.getPos()
+  local dx = padVec.x - currentPos.x
+  local dz = padVec.z - currentPos.z
+
+  -- move up one to avoid chest collisions etc
+  if turtle.up() then
+    local elevated = vector.new(currentPos.x, currentPos.y + 1, currentPos.z)
+    nav.setPos(elevated) -- update internal state
+  end
+
+  -- face toward pad
+  if math.abs(dx) > math.abs(dz) then
+    nav.face(dx > 0 and 1 or 3)
+  else
+    nav.face(dz > 0 and 2 or 0)
+  end
+
+  nav.moveTo(padVec)
+end
+
 local function loadWaypoints()
   local wp = {}
   if not fs.exists("waypoints.txt") then
@@ -134,6 +155,13 @@ local function runDelivery(path, quantityRequested)
     sleep(1)
   end
 
+  if nav.atHome() then
+    local pads = state.listHomePads()
+    local pad = pads[math.random(#pads)] -- or smarter selection if needed
+    print("[RETURN] Navigating from depot to assigned home pad.")
+    returnFromWaypointToPad(pad)
+  end
+  
   return true
 end
 
