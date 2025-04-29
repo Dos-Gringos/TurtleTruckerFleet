@@ -228,7 +228,7 @@ while true do
         end
       end
 
-      local homePads = nav_state.listHomePads()
+      local homePads = state.listHomePads()
       local myPad = homePads[math.random(#homePads)] --can add smarter selection later
 
       print("[DEPARTURE] Moving from home pad to depot start")
