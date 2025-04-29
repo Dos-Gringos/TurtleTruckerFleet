@@ -17,23 +17,29 @@ shell.run("sync_waypoints.lua")
 local function loadWaypoints()
   local wp = {}
   if not fs.exists("waypoints.txt") then
-    error("No waypoints.txt found")
+    error("[WAYPOINTS] waypoints.txt not found")
   end
+
   local f = fs.open("waypoints.txt", "r")
   while true do
     local line = f.readLine()
     if not line then break end
-    local name, x, y, z = line:match("^(%S+)%s+(-?%d+)%s+(-?%d+)%s+(-?%d+)$")
+
+    -- trim leading/trailing whitespace
+    line = line:match("^%s*(.-)%s*$")
+
+    -- parse
+    local name, x, y, z = line:match("^(%S+)%s*(-?%d+)%s*(-?%d+)%s*(-?%d+)$")
     if name and x and y and z then
       wp[name] = vector.new(tonumber(x), tonumber(y), tonumber(z))
+      print("[WAYPOINT LOADED]", name, x, y, z) -- good debug line
     else
-      error("Malformed waypoint line: " .. line)
+      error("[WAYPOINTS] Malformed line: '" .. line .. "'")
     end
   end
   f.close()
   return wp
 end
-
 
 local function sendStatus(status, pathInfo)
     local msg = {
