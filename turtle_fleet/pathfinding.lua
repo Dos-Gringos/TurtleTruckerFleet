@@ -14,21 +14,26 @@ local idleWatch = require("nav/idle_watch")
 rednet.open("right") -- adjust to your modem side
 shell.run("sync_waypoints.lua")
 
-local function loadWaypoints(path)
+local function loadWaypoints()
   local wp = {}
-  if not fs.exists(path) then error("waypoints.txt missing") end
-  local f = fs.open(path, "r")
+  if not fs.exists("waypoints.txt") then
+    error("No waypoints.txt found")
+  end
+  local f = fs.open("waypoints.txt", "r")
   while true do
     local line = f.readLine()
     if not line then break end
-    local name, x, y, z = line:match("(%S+)%s+(%-?%d+)%s+(%-?%d+)%s+(%-?%d+)")
+    local name, x, y, z = line:match("^(%S+)%s+(-?%d+)%s+(-?%d+)%s+(-?%d+)$")
     if name and x and y and z then
       wp[name] = vector.new(tonumber(x), tonumber(y), tonumber(z))
+    else
+      error("Malformed waypoint line: " .. line)
     end
   end
   f.close()
   return wp
 end
+
 
 local function sendStatus(status, pathInfo)
     local msg = {
