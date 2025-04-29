@@ -24,7 +24,7 @@ local function returnFromWaypointToPad(padVec)
   -- move up one to avoid chest collisions etc
   if turtle.up() then
     local elevated = vector.new(currentPos.x, currentPos.y + 1, currentPos.z)
-    nav.setPos(elevated) -- update internal state
+    state.setPos(elevated) -- update internal state
   end
 
   -- face toward pad
