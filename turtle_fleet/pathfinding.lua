@@ -103,12 +103,16 @@ local function runDelivery(path, pickupIdx, dropoffIdx, quantityRequested)
 
   while remaining > 0 do
     -- travel to pickup
-    for i = 1, pickupIdx do
-      sendStatus("moving", {current = i, total = #path, direction = "to_pickup", waypoint = path[i]})
-      if nav.emergencyReturn() then return false end
-      nav.moveTo(path[i])
-      idleWatch.resetTimer()
-      sleep(0.2)
+    local pickupPos = path[pickupIdx]
+    sendStatus("moving", {current = pickupIdx, total = #path, direction = "to_pickup", waypoint = pickupPos})
+    if nav.emergencyReturn() then return false end
+    nav.moveTo(pickupPos)
+    idleWatch.resetTimer()
+    sleep(0.2)
+
+    if not findChest() then
+      print("[PICKUP ERROR] No chest detected.")
+      return false
     end
 
     print("[DELIVERY] At pickup. Attempting to load cargo...")
