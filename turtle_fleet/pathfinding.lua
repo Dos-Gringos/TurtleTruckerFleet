@@ -102,19 +102,20 @@ local function runDelivery(path, pickupIdx, dropoffIdx, quantityRequested)
   print("[DELIVERY] Starting delivery loop. Total requested:", remaining)
 
   while remaining > 0 do
-    -- travel to pickup
+    -- travel to pickup point
     local pickupPos = path[pickupIdx]
+    print(string.format("[DELIVERY] Moving to pickup waypoint %d: %d %d %d", pickupIdx, pickupPos.x, pickupPos.y, pickupPos.z))
     sendStatus("moving", {current = pickupIdx, total = #path, direction = "to_pickup", waypoint = pickupPos})
     if nav.emergencyReturn() then return false end
     nav.moveTo(pickupPos)
     idleWatch.resetTimer()
     sleep(0.2)
 
+    -- verify chest and pickup
     if not findChest() then
-      print("[PICKUP ERROR] No chest detected.")
+      print("[ERROR] No chest found for pickup/dropoff!")
       return false
     end
-
     print("[DELIVERY] At pickup. Attempting to load cargo...")
     pickupItems()
     local pickedUp = countCargo()
@@ -122,15 +123,20 @@ local function runDelivery(path, pickupIdx, dropoffIdx, quantityRequested)
 
     sendStatus("picked_up", {extra = pickedUp})
 
-    -- travel to dropoff
-    for i = pickupIdx + 1, dropoffIdx do
-      sendStatus("moving", {current = i, total = #path, direction = "to_dropoff", waypoint = path[i]})
-      if nav.emergencyReturn() then return false end
-      nav.moveTo(path[i])
-      idleWatch.resetTimer()
-      sleep(0.2)
-    end
+    -- travel to dropoff point
+    local dropoffPos = path[dropoffIdx]
+    print(string.format("[DELIVERY] Moving to dropoff waypoint %d: %d %d %d", dropoffIdx, dropoffPos.x, dropoffPos.y, dropoffPos.z))
+    sendStatus("moving", {current = dropoffIdx, total = #path, direction = "to_dropoff", waypoint = dropoffPos})
+    if nav.emergencyReturn() then return false end
+    nav.moveTo(dropoffPos)
+    idleWatch.resetTimer()
+    sleep(0.2)
 
+    -- verify chest and drop
+    if not findChest() then
+      print("[ERROR] No chest found for pickup/dropoff!")
+      return false
+    end
     print("[DELIVERY] At dropoff. Dropping cargo...")
     dropItems()
     sendStatus("dropped_off", {extra = pickedUp})
@@ -140,7 +146,7 @@ local function runDelivery(path, pickupIdx, dropoffIdx, quantityRequested)
 
     print("[DELIVERY] Remaining items to deliver:", remaining)
 
-    -- go home between trips
+    -- return home if needed
     if not nav.atHome() then
       goHome()
     end
