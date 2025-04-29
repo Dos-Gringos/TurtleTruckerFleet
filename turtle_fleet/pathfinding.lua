@@ -237,8 +237,12 @@ while true do
         end
       end
 
-      local homePads = state.listHomePads()
-      local myPad = homePads[math.random(#homePads)] --can add smarter selection later
+      if nav.atHome() then
+        local pads = state.listHomePads()
+        local pad = pads[math.random(#pads)] -- or smarter selection
+        print("[DEPARTURE] Moving from home pad to depot start.")
+        returnFromWaypointToPad(path[1]) -- move toward first waypoint (factory1home)
+      end
 
       print("[DEPARTURE] Moving from home pad to depot start")
       departFromPad(path[1]) --move to the first waypoint
