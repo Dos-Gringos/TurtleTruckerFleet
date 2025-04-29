@@ -11,6 +11,7 @@ local nav = require("nav")
 local goHome = require("nav/home_return")
 local idleWatch = require("nav/idle_watch")
 local detectDirection = require("nav/detect_direction")
+local state = require("nav/state")
 
 rednet.open("right") -- adjust to your modem side
 shell.run("sync_waypoints.lua")
