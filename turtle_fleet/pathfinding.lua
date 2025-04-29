@@ -96,61 +96,40 @@ local function countCargo()
   return count
 end
 
--- === DELIVERY RUNNER ===
-local function runDelivery(path, pickupIdx, dropoffIdx, quantityRequested)
+-- === smarter delivery loop ===
+local function runDelivery(path, quantityRequested)
   local remaining = quantityRequested
-  print("[DELIVERY] Starting delivery loop. Total requested:", remaining)
+  print("[DELIVERY] Starting delivery. Target:", remaining)
 
   while remaining > 0 do
-    -- travel to pickup point
-    local pickupPos = path[pickupIdx]
-    print(string.format("[DELIVERY] Moving to pickup waypoint %d: %d %d %d", pickupIdx, pickupPos.x, pickupPos.y, pickupPos.z))
-    sendStatus("moving", {current = pickupIdx, total = #path, direction = "to_pickup", waypoint = pickupPos})
-    if nav.emergencyReturn() then return false end
-    nav.moveTo(pickupPos)
-    idleWatch.resetTimer()
-    sleep(0.2)
+    for i = 1, #path do
+      local waypoint = path[i]
+      sendStatus("moving", {current = i, total = #path, direction = "forward", waypoint = waypoint})
+      if nav.emergencyReturn() then return false end
 
-    -- verify chest and pickup
-    if not findChest() then
-      print("[ERROR] No chest found for pickup/dropoff!")
-      return false
-    end
-    print("[DELIVERY] At pickup. Attempting to load cargo...")
-    pickupItems()
-    local pickedUp = countCargo()
-    print("[DELIVERY] Picked up", pickedUp, "items.")
+      nav.moveTo(waypoint)
+      idleWatch.resetTimer()
+      sleep(0.2)
 
-    sendStatus("picked_up", {extra = pickedUp})
-
-    -- travel to dropoff point
-    local dropoffPos = path[dropoffIdx]
-    print(string.format("[DELIVERY] Moving to dropoff waypoint %d: %d %d %d", dropoffIdx, dropoffPos.x, dropoffPos.y, dropoffPos.z))
-    sendStatus("moving", {current = dropoffIdx, total = #path, direction = "to_dropoff", waypoint = dropoffPos})
-    if nav.emergencyReturn() then return false end
-    nav.moveTo(dropoffPos)
-    idleWatch.resetTimer()
-    sleep(0.2)
-
-    -- verify chest and drop
-    if not findChest() then
-      print("[ERROR] No chest found for pickup/dropoff!")
-      return false
-    end
-    print("[DELIVERY] At dropoff. Dropping cargo...")
-    dropItems()
-    sendStatus("dropped_off", {extra = pickedUp})
-
-    remaining = remaining - pickedUp
-    if remaining < 0 then remaining = 0 end
-
-    print("[DELIVERY] Remaining items to deliver:", remaining)
-
-    -- return home if needed
-    if not nav.atHome() then
-      goHome()
+      local name = msg.waypoints[i]:lower()
+      if name:find("pickup") then
+        print("[DELIVERY] Reached pickup:", name)
+        if not findChest() then print("[ERROR] No pickup chest."); return false end
+        pickupItems()
+        local picked = countCargo()
+        remaining = remaining - picked
+        print("[DELIVERY] Picked up", picked, "items. Remaining:", remaining)
+        sendStatus("picked_up", {extra = picked})
+      elseif name:find("dropoff") then
+        print("[DELIVERY] Reached dropoff:", name)
+        if not findChest() then print("[ERROR] No dropoff chest."); return false end
+        dropItems()
+        print("[DELIVERY] Dropped off cargo.")
+        sendStatus("dropped_off")
+      end
     end
 
+    if not nav.atHome() then goHome() end
     idleWatch.checkIdle()
     sleep(1)
   end
