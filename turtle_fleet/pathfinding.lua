@@ -106,11 +106,13 @@ while true do
       -- parse waypoint names to vectors
       local path = {}
       for _, name in ipairs(msg.waypoints) do
-        if waypoints[name] then
-          table.insert(path, waypoints[name])
+        local vec = waypoints[name]
+        if vec and type(vec) == "table" and vec.x and vec.y and vec.z then
+          table.insert(path, vec)
         else
-          error("waypoint not found: " .. name)
+          error("[WAYPOINT ERROR] '" .. name .. "' is missing or not a valid vector!")
         end
+        
       end
 
       local success = runPath(path)
