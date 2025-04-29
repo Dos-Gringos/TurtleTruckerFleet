@@ -35,6 +35,21 @@ local function returnFromWaypointToPad(padVec)
   nav.moveTo(padVec)
 end
 
+local function departFromPad(targetVec)
+  local currentPos = nav.getPos()
+  local dx = targetVec.x - currentPos.x
+  local dz = targetVec.z - currentPos.z
+
+  -- face toward the factory1home waypoint
+  if math.abs(dx) > math.abs(dz) then
+    nav.face(dx > 0 and 1 or 3) -- east/west
+  else
+    nav.face(dz > 0 and 2 or 0) -- south/north
+  end
+
+  nav.moveTo(targetVec)
+end
+
 local function loadWaypoints()
   local wp = {}
   if not fs.exists("waypoints.txt") then
@@ -161,7 +176,7 @@ local function runDelivery(path, quantityRequested)
     print("[RETURN] Navigating from depot to assigned home pad.")
     returnFromWaypointToPad(pad)
   end
-  
+
   return true
 end
 
@@ -212,6 +227,12 @@ while true do
           error("[WAYPOINT ERROR] '" .. name .. "' is missing or not a valid vector!")
         end
       end
+
+      local homePads = nav_state.listHomePads()
+      local myPad = homePads[math.random(#homePads)] --can add smarter selection later
+
+      print("[DEPARTURE] Moving from home pad to depot start")
+      departFromPad(path[1]) --move to the first waypoint
 
       if not findChest() then
         print("[ERROR] No chest found for pickup/dropoff!")
