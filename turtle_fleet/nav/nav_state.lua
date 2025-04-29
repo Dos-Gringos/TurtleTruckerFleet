@@ -14,25 +14,25 @@ local function saveState()
 
 -- === load or initialize state ===
 local function loadState()
+  local x, y, z = gps.locate()
+  if not x then
+    error("gps failed, can't initialize position")
+  end
+  pos = vector.new(x, y, z)
+  
   if fs.exists(posFile) then
     local f = fs.open(posFile, "r")
-    local x, y, z, d = tonumber(f.readLine()), tonumber(f.readLine()), tonumber(f.readLine()), tonumber(f.readLine())
+    local _x, _y, _z, d = tonumber(f.readLine()), tonumber(f.readLine()), tonumber(f.readLine()), tonumber(f.readLine())
     f.close()
-    if x and y and z and d then
-      pos = vector.new(x, y, z)
-      dir = d
-    else
-      error("invalid nav_pos.txt data")
-    end
+    if d then dir = d else dir = 0 end
   else
-    local detectDirection = require("nav/detect_direction")
-    local p, d = detectDirection()
-    pos = p
-    dir = d
-    home = vector.new(pos.x, pos.y, pos.z)
-    saveState()
+    dir = 0
   end
+  
+  home = vector.new(pos.x, pos.y, pos.z)
+  saveState()
 end
+
 
 -- === accessors ===
 return {
