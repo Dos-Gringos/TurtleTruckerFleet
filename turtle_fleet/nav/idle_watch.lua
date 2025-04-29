@@ -2,7 +2,7 @@
 -- monitor turtle idle time, return home if needed
 
 local nav = require("nav")
-local goHome = require("home_return")
+local goHome = require("nav/home_return")
 
 local timeout = 300 -- seconds (5 minutes idle)
 
