@@ -10,6 +10,7 @@ sleep(5)
 local nav = require("nav")
 local goHome = require("nav/home_return")
 local idleWatch = require("nav/idle_watch")
+local detectDirection = require("nav/detect_direction")
 
 rednet.open("right") -- adjust to your modem side
 shell.run("sync_waypoints.lua")
@@ -171,10 +172,17 @@ local function runDelivery(path, quantityRequested)
   end
 
   if nav.atHome() then
+    print("[DEPARTURE] Detecting direction...")
+    local pos, dir = detectDirection()
+    local state = require("nav/state")
+    state.setPos(pos)
+    state.setDir(dir)
+    print(string.format("[DIR DETECT] Facing %d (0=N,1=E,2=S,3=W)", dir))
+  
     local pads = state.listHomePads()
-    local pad = pads[math.random(#pads)] -- or smarter selection if needed
-    print("[RETURN] Navigating from depot to assigned home pad.")
-    returnFromWaypointToPad(pad)
+    local pad = pads[math.random(#pads)] -- later you'll want smarter assignment
+    print("[DEPARTURE] Moving from home pad to first waypoint.")
+    departFromPad(path[1])
   end
 
   return true
