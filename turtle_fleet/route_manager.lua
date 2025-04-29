@@ -80,10 +80,19 @@ while true do
           end
           f.close()
         
+          local deliveryQuantity = nil
+
+          -- set quantity if this is a delivery route
+          if routeName:find("delivery") then -- crude tag detection
+            deliveryQuantity = 129 -- or whatever default you want
+          end
+          
           rednet.send(id, {
             route = routeName,
-            waypoints = lines
+            waypoints = lines,
+            quantityRequested = deliveryQuantity
           }, "route_assign")
+          
         
           print("Assigned route " .. routeName .. " to turtle " .. msg.label)
         end
