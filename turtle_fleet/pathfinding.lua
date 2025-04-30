@@ -150,7 +150,7 @@ local function runDelivery(path,  waypointNames, quantityRequested)
       idleWatch.resetTimer()
       sleep(0.2)
 
-      local name = msg.waypoints[i]:lower()
+      local name = waypointNames[i]:lower()
       if name:match("pickup") then
         print("[DELIVERY] Reached pickup:", name)
         if not findChest() then print("[ERROR] No pickup chest."); return false end
