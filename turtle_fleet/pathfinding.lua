@@ -20,10 +20,10 @@ local function returnFromWaypointToPad(padVec)
   local currentPos = nav.getPos()
   local dx = padVec.x - currentPos.x
   local dz = padVec.z - currentPos.z
-
+  local pos = nav.getPos()
   -- move up one to avoid chest collisions etc
   if turtle.up() then
-    state.setPos(vector.new(pos.x, pos.y + 1, pos.z))
+    nav.setPos(vector.new(pos.x, pos.y + 1, pos.z))
   end
 
   -- face toward pad
@@ -35,7 +35,7 @@ local function returnFromWaypointToPad(padVec)
 
   nav.moveTo(padVec)
   turtle.down()
-  state.setPos(vector.new(pad.x, pad.y, pad.z))
+  nav.setPos(vector.new(pad.x, pad.y, pad.z))
 end
 
 local function departFromPad(targetVec)
@@ -54,12 +54,12 @@ local function departFromPad(targetVec)
   -- move up before departing
   if turtle.up() then
     local elevated = vector.new(currentPos.x, currentPos.y + 1, currentPos.z)
-    state.setPos(elevated)
+    nav.setPos(elevated)
   end
 
   nav.moveTo(targetVec)
   turtle.down()
-  state.setPos(vector.new(targetVec.x, targetVec.y, targetVec.z))
+  nav.setPos(vector.new(targetVec.x, targetVec.y, targetVec.z))
 end
 
 local function loadWaypoints()
@@ -246,7 +246,7 @@ while true do
   if nav.atHome() then
     print("[DETECT] Running direction detection...")
     local pos, dir = detectDirection()
-    state.setPos(pos)
+    nav.setPos(pos)
     state.setDir(dir)
     print(string.format("[DIR SET] Now facing %d (0=N,1=E,2=S,3=W)", dir))
 
