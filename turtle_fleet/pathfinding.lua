@@ -151,7 +151,7 @@ local function runDelivery(path,  waypointNames, quantityRequested)
       sleep(0.2)
 
       local name = msg.waypoints[i]:lower()
-      if name:find("pickup") then
+      if name:match("pickup") then
         print("[DELIVERY] Reached pickup:", name)
         if not findChest() then print("[ERROR] No pickup chest."); return false end
         pickupItems()
@@ -159,7 +159,7 @@ local function runDelivery(path,  waypointNames, quantityRequested)
         remaining = remaining - picked
         print("[DELIVERY] Picked up", picked, "items. Remaining:", remaining)
         sendStatus("picked_up", {extra = picked})
-      elseif name:find("dropoff") then
+      elseif name:match("dropoff") then
         print("[DELIVERY] Reached dropoff:", name)
         if not findChest() then print("[ERROR] No dropoff chest."); return false end
         dropItems()
@@ -251,11 +251,6 @@ while true do
 
       print("[DEPARTURE] Moving from home pad to depot start")
       departFromPad(path[1]) --move to the first waypoint
-
-      if not findChest() then
-        print("[ERROR] No chest found for pickup/dropoff!")
-        return false
-      end
       
       local success = false
 
