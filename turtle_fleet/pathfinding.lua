@@ -23,8 +23,7 @@ local function returnFromWaypointToPad(padVec)
 
   -- move up one to avoid chest collisions etc
   if turtle.up() then
-    local elevated = vector.new(currentPos.x, currentPos.y + 1, currentPos.z)
-    state.setPos(elevated) -- update internal state
+    nav.setPos(vector.new(pos.x, pos.y + 1, pos.z))
   end
 
   -- face toward pad
@@ -35,12 +34,15 @@ local function returnFromWaypointToPad(padVec)
   end
 
   nav.moveTo(padVec)
+  turtle.down()
+  nav.setPos(vector.new(pad.x, pad.y, pad.z))
 end
 
 local function departFromPad(targetVec)
   local currentPos = nav.getPos()
   local dx = targetVec.x - currentPos.x
   local dz = targetVec.z - currentPos.z
+
 
   -- face toward the factory1home waypoint
   if math.abs(dx) > math.abs(dz) then
@@ -49,7 +51,15 @@ local function departFromPad(targetVec)
     nav.face(dz > 0 and 2 or 0) -- south/north
   end
 
+  -- move up before departing
+  if turtle.up() then
+    local elevated = vector.new(currentPos.x, currentPos.y + 1, currentPos.z)
+    nav.setPos(elevated)
+  end
+
   nav.moveTo(targetVec)
+  turtle.down()
+  nav.setPos(vector.new(targetVec.x, targetVec.y, targetVec.z))
 end
 
 local function loadWaypoints()
@@ -177,7 +187,7 @@ local function runDelivery(path,  waypointNames, quantityRequested)
         dropItems()
         print("[DELIVERY] Dropped off cargo.")
         sendStatus("dropped_off")
-        
+
         local returnTarget = path[1]
         print(string.format("[RETURN] Navigating from dropoff back to depot entry (%d %d %d)", returnTarget.x, returnTarget.y, returnTarget.z))
         nav.moveTo(returnTarget)
