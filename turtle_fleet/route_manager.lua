@@ -25,7 +25,9 @@ end
 print("Route Manager Server Started\n")
 
 while true do
-  local id, msg, proto = rednet.receive()
+  local id, msg, proto = rednet.receive("route_assign")
+  print("[DEBUG] Received msg:", textutils.serialize(msg))
+
 
   if type(msg) == "string" and msg == "turtle_hello" then
     rednet.send(id, "server_ack")

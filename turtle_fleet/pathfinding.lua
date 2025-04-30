@@ -74,6 +74,10 @@ local function loadWaypoints()
     else
       error("[WAYPOINTS] Malformed line: '" .. line .. "'")
     end
+    print("[DEBUG] Parsed path length:", #path)
+    for i, vec in ipairs(path) do
+      print(string.format("  %d: %d %d %d", i, vec.x, vec.y, vec.z))
+    end
   end
   f.close()
   return wp
@@ -137,7 +141,6 @@ end
 -- === smarter delivery loop ===
 local function runDelivery(path,  waypointNames, quantityRequested)
   local remaining = quantityRequested
-  local name = waypointNames[i]:lower()
 
   print("[DELIVERY] Starting delivery. Target:", remaining)
 
@@ -257,8 +260,6 @@ while true do
 
       if msg.quantityRequested then
         print("[DELIVERY] Delivery mode detected. Quantity requested:", msg.quantityRequested)
-        local pickupIdx = 1
-        local dropoffIdx = #path
         success = runDelivery(path, msg.waypoints, msg.quantityRequested)
       else
         print("[PATROL] Patrol mode detected.")
