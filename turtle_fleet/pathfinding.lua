@@ -177,6 +177,17 @@ local function runDelivery(path,  waypointNames, quantityRequested)
         dropItems()
         print("[DELIVERY] Dropped off cargo.")
         sendStatus("dropped_off")
+        
+        local returnTarget = path[1]
+        print(string.format("[RETURN] Navigating from dropoff back to depot entry (%d %d %d)", returnTarget.x, returnTarget.y, returnTarget.z))
+        nav.moveTo(returnTarget)
+        idleWatch.resetTimer()
+        sleep(0.2)
+        
+        -- then go home
+        if not nav.atHome() then
+          goHome()
+        end
       end
     end
 
