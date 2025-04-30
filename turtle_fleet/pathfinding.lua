@@ -74,10 +74,6 @@ local function loadWaypoints()
     else
       error("[WAYPOINTS] Malformed line: '" .. line .. "'")
     end
-    print("[DEBUG] Parsed path length:", #path)
-    for i, vec in ipairs(path) do
-      print(string.format("  %d: %d %d %d", i, vec.x, vec.y, vec.z))
-    end
   end
   f.close()
   return wp
@@ -239,6 +235,11 @@ while true do
         else
           error("[WAYPOINT ERROR] '" .. name .. "' is missing or not a valid vector!")
         end
+      end
+      
+      print("[DEBUG] Parsed path length:", #path)
+      for i, vec in ipairs(path) do
+        print(string.format("  %d: %d %d %d", i, vec.x, vec.y, vec.z))
       end
 
       if nav.atHome() then
