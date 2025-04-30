@@ -98,6 +98,8 @@ local function sendStatus(status, pathInfo)
 end
 
 local function findChest()
+  local originalDir = state.getDir()
+
   for i = 1, 4 do
     local success, data = turtle.inspect()
     if success and data.name and data.name:lower():find("chest") then
@@ -105,10 +107,20 @@ local function findChest()
       return true
     end
     turtle.turnRight()
+    state.setDir((state.getDir() + 1) % 4)
   end
+
+  -- rotate back to original facing
+  local desiredTurns = (originalDir - state.getDir()) % 4
+  for i = 1, desiredTurns do
+    turtle.turnRight()
+    state.setDir((state.getDir() + 1) % 4)
+  end
+
   print("[CHEST NOT FOUND] No chest adjacent.")
   return false
 end
+
 
 local function pickupItems()
   for slot = 2, 16 do
