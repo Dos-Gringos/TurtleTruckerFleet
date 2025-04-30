@@ -23,7 +23,7 @@ local function returnFromWaypointToPad(padVec)
 
   -- move up one to avoid chest collisions etc
   if turtle.up() then
-    nav.setPos(vector.new(pos.x, pos.y + 1, pos.z))
+    state.setPos(vector.new(pos.x, pos.y + 1, pos.z))
   end
 
   -- face toward pad
@@ -35,7 +35,7 @@ local function returnFromWaypointToPad(padVec)
 
   nav.moveTo(padVec)
   turtle.down()
-  nav.setPos(vector.new(pad.x, pad.y, pad.z))
+  state.setPos(vector.new(pad.x, pad.y, pad.z))
 end
 
 local function departFromPad(targetVec)
@@ -54,12 +54,12 @@ local function departFromPad(targetVec)
   -- move up before departing
   if turtle.up() then
     local elevated = vector.new(currentPos.x, currentPos.y + 1, currentPos.z)
-    nav.setPos(elevated)
+    state.setPos(elevated)
   end
 
   nav.moveTo(targetVec)
   turtle.down()
-  nav.setPos(vector.new(targetVec.x, targetVec.y, targetVec.z))
+  state.setPos(vector.new(targetVec.x, targetVec.y, targetVec.z))
 end
 
 local function loadWaypoints()
