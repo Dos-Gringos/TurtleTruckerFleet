@@ -238,7 +238,7 @@ while true do
   if nav.atHome() then
     print("[DETECT] Running direction detection...")
     local pos, dir = detectDirection()
-    nav.setPos(pos)
+    state.setPos(pos)
     state.setDir(dir)
     print(string.format("[DIR SET] Now facing %d (0=N,1=E,2=S,3=W)", dir))
 
