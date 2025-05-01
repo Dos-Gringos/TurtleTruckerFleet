@@ -16,6 +16,7 @@ local state = require("nav/state")
 rednet.open("right") -- adjust to your modem side
 shell.run("sync_waypoints.lua")
 
+-- === pad navigation helpers ===
 local function returnFromWaypointToPad(padVec)
   local currentPos = nav.getPos()
   local dx = padVec.x - currentPos.x
@@ -35,7 +36,7 @@ local function returnFromWaypointToPad(padVec)
 
   nav.moveTo(padVec)
   turtle.down()
-  nav.setPos(vector.new(pad.x, pad.y, pad.z))
+  nav.setPos(vector.new(padVec.x, padVec.y, padVec.z))
 end
 
 local function departFromPad(targetVec)
@@ -43,12 +44,11 @@ local function departFromPad(targetVec)
   local dx = targetVec.x - currentPos.x
   local dz = targetVec.z - currentPos.z
 
-
-  -- face toward the factory1home waypoint
+  -- face toward the first waypoint
   if math.abs(dx) > math.abs(dz) then
-    nav.face(dx > 0 and 1 or 3) -- east/west
+    nav.face(dx > 0 and 1 or 3)
   else
-    nav.face(dz > 0 and 2 or 0) -- south/north
+    nav.face(dz > 0 and 2 or 0)
   end
 
   -- move up before departing
@@ -62,6 +62,7 @@ local function departFromPad(targetVec)
   nav.setPos(vector.new(targetVec.x, targetVec.y, targetVec.z))
 end
 
+-- === load all named waypoints from file ===
 local function loadWaypoints()
   local wp = {}
   if not fs.exists("waypoints.txt") then
@@ -73,10 +74,7 @@ local function loadWaypoints()
     local line = f.readLine()
     if not line then break end
 
-    -- trim leading/trailing whitespace
     line = line:match("^%s*(.-)%s*$")
-
-    -- parse
     local name, x, y, z = line:match("^(%S+)%s*(-?%d+)%s*(-?%d+)%s*(-?%d+)$")
     if name and x and y and z then
       wp[name] = vector.new(tonumber(x), tonumber(y), tonumber(z))
@@ -89,6 +87,7 @@ local function loadWaypoints()
   return wp
 end
 
+-- === broadcast turtle status to dashboard/server ===
 local function sendStatus(status, pathInfo)
   local msg = {
     id = os.getComputerID(),
@@ -107,6 +106,7 @@ local function sendStatus(status, pathInfo)
   rednet.broadcast(msg, "turtle_status")
 end
 
+-- === chest detection logic ===
 local function findChest()
   local originalDir = state.getDir()
 
@@ -120,7 +120,6 @@ local function findChest()
     state.setDir((state.getDir() + 1) % 4)
   end
 
-  -- rotate back to original facing
   local desiredTurns = (originalDir - state.getDir()) % 4
   for i = 1, desiredTurns do
     turtle.turnRight()
@@ -131,7 +130,7 @@ local function findChest()
   return false
 end
 
-
+-- === cargo logic ===
 local function pickupItems()
   for slot = 2, 16 do
     turtle.select(slot)
@@ -157,9 +156,9 @@ local function countCargo()
 end
 
 -- === smarter delivery loop ===
-local function runDelivery(path,  waypointNames, quantityRequested)
+-- moves to pickup, collects items, moves to dropoff, dumps cargo, returns to depot entrance, then parks
+local function runDelivery(path, waypointNames, quantityRequested)
   local remaining = quantityRequested
-
   print("[DELIVERY] Starting delivery. Target:", remaining)
 
   while remaining > 0 do
@@ -175,7 +174,7 @@ local function runDelivery(path,  waypointNames, quantityRequested)
       local name = waypointNames[i]:lower()
       if name:match("pickup") then
         print("[DELIVERY] Reached pickup:", name)
-        if not findChest() then print("[ERROR] No pickup chest."); return false end
+        if not findChest() then print("[ERROR] No pickup chest.") return false end
         pickupItems()
         local picked = countCargo()
         remaining = remaining - picked
@@ -183,18 +182,18 @@ local function runDelivery(path,  waypointNames, quantityRequested)
         sendStatus("picked_up", {extra = picked})
       elseif name:match("dropoff") then
         print("[DELIVERY] Reached dropoff:", name)
-        if not findChest() then print("[ERROR] No dropoff chest."); return false end
+        if not findChest() then print("[ERROR] No dropoff chest.") return false end
         dropItems()
         print("[DELIVERY] Dropped off cargo.")
         sendStatus("dropped_off")
 
+        -- return to first nav point (e.g. depot entry)
         local returnTarget = path[1]
         print(string.format("[RETURN] Navigating from dropoff back to depot entry (%d %d %d)", returnTarget.x, returnTarget.y, returnTarget.z))
         nav.moveTo(returnTarget)
         idleWatch.resetTimer()
         sleep(0.2)
-        
-        -- then go home
+
         if not nav.atHome() then
           goHome()
         end
@@ -205,18 +204,12 @@ local function runDelivery(path,  waypointNames, quantityRequested)
     idleWatch.checkIdle()
     sleep(1)
   end
-  
-    local pads = state.listHomePads()
-    local pad = pads[math.random(#pads)] -- later you'll want smarter assignment
-    print("[DEPARTURE] Moving from home pad to first waypoint.")
-    departFromPad(path[1])
 
   return true
 end
 
--- === PATROL RUNNER ===
+-- === legacy patrol path logic ===
 local function runPath(path)
-  -- forward
   for i = 1, #path do
     sendStatus("moving", {current = i, total = #path, direction = "forward", waypoint = path[i]})
     if nav.emergencyReturn() then return false end
@@ -225,7 +218,6 @@ local function runPath(path)
     sleep(0.2)
   end
 
-  -- reverse trip back
   for i = #path - 1, 1, -1 do
     sendStatus("moving", {current = i, total = #path, direction = "return", waypoint = path[i]})
     if nav.emergencyReturn() then return false end
@@ -252,8 +244,6 @@ while true do
 
     sendStatus("idle")
     print("Waiting for route assignment...")
-    sendStatus("idle")
-    print("Waiting for route assignment...")
 
     local id, msg, proto = rednet.receive("route_assign")
     if msg and msg.waypoints then
@@ -269,24 +259,23 @@ while true do
           error("[WAYPOINT ERROR] '" .. name .. "' is missing or not a valid vector!")
         end
       end
-      
+
       print("[DEBUG] Parsed path length:", #path)
       for i, vec in ipairs(path) do
         print(string.format("  %d: %d %d %d", i, vec.x, vec.y, vec.z))
       end
 
+      -- depart from pad to first waypoint (depot entry)
       if nav.atHome() then
         local pads = state.listHomePads()
-        local pad = pads[math.random(#pads)] -- or smarter selection
+        local pad = pads[math.random(#pads)]
         print("[DEPARTURE] Moving from home pad to depot start.")
-        returnFromWaypointToPad(path[1]) -- move toward first waypoint (factory1home)
+        returnFromWaypointToPad(path[1])
       end
 
-      print("[DEPARTURE] Moving from home pad to depot start")
-      departFromPad(path[1]) --move to the first waypoint
-      
-      local success = false
+      departFromPad(path[1])
 
+      local success = false
       if msg.quantityRequested then
         print("[DELIVERY] Delivery mode detected. Quantity requested:", msg.quantityRequested)
         success = runDelivery(path, msg.waypoints, msg.quantityRequested)
@@ -295,7 +284,6 @@ while true do
         success = runPath(path)
       end
 
-      -- refuel if at home and needed
       if nav.atHome() and not nav.checkFuel() then
         turtle.select(1)
         turtle.suck()
@@ -303,7 +291,6 @@ while true do
       end
 
       idleWatch.checkIdle()
-
       sendStatus(success and "complete" or "aborted")
       print("Route", success and "complete" or "aborted due to emergency.")
 
